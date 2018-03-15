@@ -95,3 +95,22 @@ hidden layers with 10, 5 and 10 nodes, and an output layer of 6645
 nodes. The output data is equal to the input data. Thus the and thus
 learns to represent the SMRs which are not deemed worthy of a case
 officer’s attention.
+
+Classification
+--------------
+
+Usually, SMRs are manually classified (no further action, more
+information required, etc). The model reads the SMR details and provides
+an expected classification; the model is built based on the structured
+and unstructured data within the SMR to determine the relevance and
+impact of each piece of data (features) relative to the manual
+classification - this is then applied to new SMRs. The need for manual
+classification is therefore significantly reduced and the full
+population of SMRs can be automatically classified - more effective,
+more efficient.
+
+We have used KNIME to build a gradient boosted ensemble of
+classification trees. As there was no signal in the mocked up data,
+classification error was near 50%.
+
+![KNIME](/KNIME.png)
