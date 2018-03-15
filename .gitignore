@@ -5,6 +5,7 @@
 
 *.hdf5
 *.xlsx
+*.html
 grimace.jpg
 Autoencoder_structure.png
 master.R
