@@ -82,28 +82,6 @@ order. So called “stop words” which contain no meaning are discarded.
 The result is a document-term matrix, where the rows correspond to
 individual SMRs, and the columns to word counts (only 8 columns shown):
 
-    ## ── Attaching packages ───────────────────────────────── tidyverse 1.2.1 ──
-
-    ## ✔ ggplot2 2.2.1     ✔ purrr   0.2.4
-    ## ✔ tibble  1.4.2     ✔ dplyr   0.7.4
-    ## ✔ tidyr   0.8.0     ✔ stringr 1.2.0
-    ## ✔ ggplot2 2.2.1     ✔ forcats 0.2.0
-
-    ## ── Conflicts ──────────────────────────────────── tidyverse_conflicts() ──
-    ## ✖ dplyr::filter() masks stats::filter()
-    ## ✖ dplyr::lag()    masks stats::lag()
-
-    ## 
-    ## Attaching package: 'magrittr'
-
-    ## The following object is masked from 'package:purrr':
-    ## 
-    ##     set_names
-
-    ## The following object is masked from 'package:tidyr':
-    ## 
-    ##     extract
-
     ##     Terms
     ## Docs currency digital exchange increase time transactions funds
     ##    1        1       1        1        1    1            1     0
@@ -117,7 +95,3 @@ hidden layers with 10, 5 and 10 nodes, and an output layer of 6645
 nodes. The output data is equal to the input data. Thus the and thus
 learns to represent the SMRs which are not deemed worthy of a case
 officer’s attention.
-
-![](theGrimaces_files/figure-markdown_github/unnamed-chunk-6-1.png)
-
-The

@@ -39,7 +39,7 @@ names(SMRs)
 Note that column 27 contains free, unstructured text, which we have found in Austrac case stories.  We model the text as a bag of words, which counts the number of occurrences of words only, and neglects their order. So called "stop words" which contain no meaning are discarded. The result is a document-term matrix, where the rows correspond to individual SMRs, and the columns to word counts (only 8 columns shown): 
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE}
 library(tidyverse)
 library(tidytext)
 library(magrittr)
@@ -108,7 +108,7 @@ training_history <- model %>% fit(
 plot(training_history)
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, include=FALSE}
 train_error <- apply((predict(model, x_train) - x_train)^2, 1, sum)
 test_error  <- apply((predict(model, x_test) - x_test)^2, 1, sum)
 
@@ -117,4 +117,3 @@ hist(log(train_error))
 hist(log(test_error))
 ```
 
-The 
