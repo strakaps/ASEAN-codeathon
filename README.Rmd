@@ -1,7 +1,12 @@
 ---
 title: "Coding Grimaces"
-output: html_notebook
+output:
+  md_document:
+    variant: markdown_github
+  html_notebook: default
 ---
+
+
 
 ## Autoencoders
 
@@ -25,6 +30,7 @@ Not having access to SMR data, we have generated mock-up data of 1000 rows, via
 
 
 ```{r, echo=FALSE, message=FALSE}
+library(readr)
 SMRs <- read_csv("SMR_Mock_Data_20180315_1103hrs.csv")
 SMRs$row_num <- 1:dim(SMRs)[1]
 names(SMRs)
