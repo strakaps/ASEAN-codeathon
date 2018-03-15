@@ -1,0 +1,114 @@
+---
+title: "Coding Grimaces"
+output: html_notebook
+---
+
+## Autoencoders
+
+Autoencoders learn the probability distribution of complex, unstructured data such as the 80,000 odd yearly submitted Suspicious Matter Reports (SMRs). Austrac's Resources are limited, which means that the majority of SMRs can not be followed up upon. We create methods to assist the case officers in directing their attention to important SMRs.
+
+SMRs can be important for two reasons: 
+
+1. Quality assurance: we detect "outlying" reporting entities, which report too many irrelevant, or too few SMRs. Thus Austrac has the opportunity to correct the reporting behaviour of these entities, providing better SMRs in the future. 
+
+2. Urgent relevance: certain SMRs need to be acted on immediately.
+
+For both situations, we train autoencoders to learn the probability distribution of SMRs which do **not** require attention from the quality assurance point of view, and which do **not** require attention from the urgency point of view. A case officer trains adds an SMR to the training set of the autoencoder every time they decide that this SMR does not need attention. 
+
+Being trained, autoencoders can quickly compute how unlikely it is that an SMR does not require attention. We then present the case officer with a list of SMRs in decreasing order of this probability. The more cases an officer works through, the better the more experienced and better the autoencoder gets. 
+
+
+## Mock-up data
+
+Not having access to SMR data, we have generated mock-up data of 1000 rows, via 
+[Mockaroo](https://mockaroo.com/), with the following variables: 
+
+
+```{r, echo=FALSE, message=FALSE}
+SMRs <- read_csv("SMR_Mock_Data_20180315_1103hrs.csv")
+SMRs$row_num <- 1:dim(SMRs)[1]
+names(SMRs)
+```
+
+Note that column 27 contains free, unstructured text, which we have found in Austrac case stories.  We model the text as a bag of words, which counts the number of occurrences of words only, and neglects their order. So called "stop words" which contain no meaning are discarded. The result is a document-term matrix, where the rows correspond to individual SMRs, and the columns to word counts (only 8 columns shown): 
+
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(tidytext)
+library(magrittr)
+data("stop_words")
+
+row_num_SI <- SMRs[,c("row_num", "Trans_Notes")]
+tokens <- unnest_tokens(tbl = row_num_SI, output = word, 
+              input = "Trans_Notes")
+
+tokens %<>% anti_join(y = stop_words, by = 'word') %>%
+  group_by(row_num, word) %>%
+  summarise(count = n()) %>% ungroup()
+
+SMR_dtm <- tokens %>% cast_dtm(row_num, word, count)
+as.matrix(SMR_dtm[1:5, 1:7])
+```
+
+Our autoencoder is a neural network with an input layer of 6645 nodes, 
+hidden layers with 10, 5 and 10 nodes, and an output layer of 6645 nodes. 
+The output data is equal to the input data. 
+Thus the and thus learns to represent 
+the SMRs which are not deemed worthy of a case officer's attention. 
+
+```{r, include=FALSE}
+train_i <- 1:300
+x_train <- as.matrix(SMR_dtm[train_i,])
+x_test <- as.matrix(SMR_dtm[-train_i, ])
+library(keras)
+model <- keras_model_sequential()
+model %>%
+  layer_dense(units = 10, activation = "tanh", input_shape = ncol(x_train), bias_initializer = "ones") %>%
+  layer_dense(units = 5, activation = "tanh") %>%
+  layer_dense(units = 10, activation = "tanh") %>%
+  layer_dense(units = ncol(x_train))
+summary(model)
+```
+
+
+
+```{r, include = FALSE}
+model %>% compile(
+  loss = "mean_squared_error", 
+  optimizer = "adam"
+)
+
+
+checkpoint <- callback_model_checkpoint(
+  filepath = "model.hdf5", 
+  save_best_only = TRUE, 
+  period = 1,
+  verbose = 1
+)
+
+early_stopping <- callback_early_stopping(patience = 5)
+```
+
+```{r, include=FALSE}
+training_history <- model %>% fit(
+  x = x_train, 
+  y = x_train, 
+  epochs = 300, 
+  batch_size = 32,
+  validation_data = list(x_test, x_test), 
+  callbacks = list(checkpoint, early_stopping)
+)
+plot(training_history)
+```
+
+```{r, echo=FALSE}
+train_error <- apply((predict(model, x_train) - x_train)^2, 1, sum)
+test_error  <- apply((predict(model, x_test) - x_test)^2, 1, sum)
+
+par(mfrow=c(1,2))
+hist(log(train_error))
+hist(log(test_error))
+```
+
+The 
